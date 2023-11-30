@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../../..">
+      <sourceFolder url="file://$MODULE_DIR$/../delivery-and-pickup-scheduling-for-woocommerce/includes" isTestSource="false" packagePrefix="Lpac_DPS" />
+      <sourceFolder url="file://$MODULE_DIR$/../delivery-and-pickup-scheduling-pro/includes" isTestSource="false" packagePrefix="Lpac_DPS" />
+      <sourceFolder url="file://$MODULE_DIR$/../weight-based-shipping-for-woocommerce/server/src" isTestSource="false" packagePrefix="Wbs" />
+      <sourceFolder url="file://$MODULE_DIR$/../woocommerce/packages/action-scheduler/classes" isTestSource="false" packagePrefix="Action_Scheduler" />
+      <sourceFolder url="file://$MODULE_DIR$/../wp-mail-smtp/src" isTestSource="false" packagePrefix="WPMailSMTP" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../wp-includes" isTestSource="false" packagePrefix="PHPMailer" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

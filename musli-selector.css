@@ -1,0 +1,257 @@
+#step1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-gap: 10px;
+    max-width: 1200px;  /* Adjust as per your design needs */
+    margin: 0 auto;  /* Ensures the grid is centered */
+}
+
+.product-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    width: auto;
+    height: auto;
+    overflow: auto;
+    border-radius: 5px;
+    text-align: center;
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.product-box h4 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.add-to-cart-button {
+    font-size: 13px; /* Adjust as needed */
+    font-weight: bold;
+    padding: 5px 10px; /* Adjust as needed */
+    border: none;
+    box-shadow: none;
+    margin: 0 auto;
+    display: block;
+    border-radius: 5px;
+    width: 127px;
+    height: 25px;
+    background-color: #f0ad4e;
+    color: #fff;
+    cursor: pointer;
+}
+
+@media (min-width: 1200px) {
+    #step1 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-gap: 10px;
+        max-width: 1200px;  /* Adjust as per your design needs */
+        margin: 0 auto;  /* Ensures the grid is centered */
+    }
+}
+@media (max-width: 1199px) and (min-width: 768px) {
+    #step1 {
+        max-width: 600px;
+    }
+}
+
+@media (max-width: 767px) {
+    #step1 {
+        max-width: 300px;  /* You can adjust this as per your design needs */
+    }
+}
+body .product-box img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+#status-bar {
+    height: 5px;
+    background-color: rgb(115, 244, 115);
+    transition: width 0.5s ease-in-out;
+    border-radius: 5px;
+}
+.checkout-button {
+    display: none; /* Initially hidden */
+    margin: 0 auto; /* Center the button */
+    cursor: pointer;
+}
+#checkout-button {
+    background-color: #f0ad4e; /* Change to your desired color */
+    color: #fff; /* Change to your desired color */
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    transition: width 0.2s ease-in-out;
+}
+#checkout-button:hover {
+    background-color: #e38d13; /* Change to your desired color */
+    color: #fff; /* Change to your desired color */
+    cursor: pointer;
+    transition: width 0.2s ease-in-out;
+}
+
+#checkout-button:disabled {
+    background-color: #ccc; /* Change to your desired color */
+    color: #888; /* Change to your desired color */
+    cursor: not-allowed;
+    transition: width 0.2s ease-in-out;
+}
+#cart-popup {
+    position: relative; /* Relative positioning for the "X" button */
+    padding: 20px;
+    background-color: rgba(240, 173, 78, 0.7); /* Semi-transparent */
+    color: #fff;
+    border-radius: 5px;
+    text-align: center; /* Center the text and buttons */
+}
+
+        .popup-content {
+            padding: 20px 0; /* Add space above and below the content */
+            }
+
+#cart-popup button {
+    display: inline-block;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin: 5px;
+    line-height: 1.5;
+    border: none;
+    background-color: #f0ad4e;
+    color: #fff;
+    cursor: pointer;
+    width: 141px;
+    height: 34px;
+    transition: width 0.5s ease-in-out;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark, semi-transparent */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Prevent scrolling */
+    z-index: 1000;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.heading-class {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+#musli-heading, #ingredients-heading {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-gap: 20px;
+    align-items: start; /* Makes all boxes the same height */
+    justify-content: center; /* Centers the grid horizontally */
+    width: 100%;
+}
+
+body .navigation-buttons {
+    text-align: center;
+}
+
+body .navigation-buttons button {
+    display: inline-block;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin: 5px;
+    line-height: 1.5;
+    border: none;
+    background-color: #f0ad4e;
+    color: #fff;
+    cursor: pointer;
+    width: 141px;
+    height: 34px;
+    padding: 0 !important;
+}
+
+body .navigation-buttons button:disabled {
+    background-color: #ccc; /* Change to your desired color */
+    color: #888; /* Change to your desired color */
+    cursor: not-allowed;
+}
+
+#step-monitor {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.input-container {
+    display: flex; /* Use flexbox for positioning the children */
+    width: auto; /* Set width as needed */
+    border: 1px solid #ccc; /* Add a border to the container */
+    border-radius: 5px; /* Add border radius to container */
+    overflow: hidden; /* Hide overflow to maintain border radius */
+}
+
+  
+  /* position the unit to the right of the wrapper */
+
+  
+  /* move unit more to the left on hover or focus within
+     for arrow buttons will appear to the right of number inputs */
+  /* handle Firefox (arrows always shown) */
+  @supports (-moz-appearance:none) {
+    div.input-container::after {
+      right: 1.5em;
+    }
+  }
+
+.input-container input[type="text"] {
+    border-radius: 16px !important;
+    border: 1px solid #ccc;
+    color: #676767;
+    padding: calc(0.667em + 2px) calc(0.967em + 2px);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    outline-offset: -2px;
+    text-align: center;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Style for increment and decrement buttons */
+.increment, .decrement {
+    background-color: #f0ad4e; /* Button background color */
+    color: #fff; /* Button text color */
+    border: none; /* Remove the border */
+    cursor: pointer; /* Change cursor to pointer */
+    width: auto;
+    height: auto;
+}
+
+/* Stack the increment button above the decrement */
+
+
+/* Stack the decrement button below the increment */
+.decrement {
+    border-top-left-radius: 5px; /* Add top border radius */
+}
+
+.input-container .unit {
+    position: absolute;
+    top: 50%;
+    right: 5px; /* Adjust as needed */
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+  
