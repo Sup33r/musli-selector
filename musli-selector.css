@@ -254,4 +254,119 @@ input[type="number"]::-webkit-outer-spin-button {
     transform: translateY(-50%);
     pointer-events: none;
 }
-  
+
+.out-of-stock img {
+    filter: grayscale(100%);
+}
+.image-container {
+    position: relative;
+}
+
+.out-of-stock .ribbon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 96%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.low-quantity {
+    color: red;
+}
+
+#special-popup {
+    display: none; /* Initially hidden */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark color */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Adds a subtle shadow */
+}
+
+.special-product-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    background-color: #fff; /* Background color for the content */
+    width: auto;
+    max-width: 250px; /* Adjust the width as per your design */
+    display: inline-block; /* Change from block to inline-block for side-by-side layout */
+}
+
+.special-product-box img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.product-text {
+    color: #c78624;
+}
+
+.special-product-box h4 {
+    margin-top: 10px;
+}
+
+/* Styling for the 'Add Special' and 'Skip' buttons */
+#special-popup button {
+    font-size: 14px;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    border-radius: 20px; /* More rounded corners for buttons */
+    border: none;
+    background-color: #f0ad4e; /* Theme color */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#special-popup button:hover {
+    background-color: #e38d13; /* Darker shade on hover */
+}
+
+.skip-button-container {
+    text-align: center;
+    padding: 10px;
+}
+
+.skip-button {
+    display: inline-block;
+    margin: 10px auto;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 20px; /* More rounded corners for buttons */
+    border: none;
+    background-color: #f0ad4e; /* Theme color */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.skip-button-mobile {
+    display: none; /* Hidden by default */
+    margin: 10px auto;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 20px; /* More rounded corners for buttons */
+    border: none;
+    background-color: #f0ad4e; /* Theme color */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+}
+
+@media (max-width: 767px) {
+    .skip-button-mobile {
+        display: inline-block;
+    }
+}

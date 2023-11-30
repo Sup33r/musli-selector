@@ -22,6 +22,19 @@ function musli_selector_shortcode( $atts ) {
     if (is_admin()) {
         return ''; // Shortcode output is empty in the admin area
     }
+    $special_products = get_posts(array(
+        'post_type' => 'product',
+        'numberposts' => -1, // Assuming you only want to display one special product
+        'tax_query' => array(
+            array(
+                'taxonomy' => 'product_tag',
+                'field' => 'slug',
+                'terms' => 'special',
+            ),
+        ),
+    ));
+
+    $has_special = !empty($special_products);
     ?>
     <div class="musli-selector">
     <div id="overlay" style="display: none;">
@@ -58,15 +71,27 @@ function musli_selector_shortcode( $atts ) {
             foreach ($bases as $base) {
                 $product = wc_get_product($base->ID);
                 $price_per_dl = $product->get_price();
+                $stock_status = $product->get_stock_status();
+                $stock_quantity = $product->get_stock_quantity();
+                $out_of_stock_class = ($stock_status === 'outofstock') ? 'out-of-stock' : '';
             ?>
-                <div class="product-box">
+                <div class="product-box <?php echo $out_of_stock_class; ?>">
+                    <div class="image-container">
                     <img src="<?php echo get_the_post_thumbnail_url($base->ID); ?>" alt="<?php echo $product->get_name(); ?>">
+                        <?php if($out_of_stock_class === 'out-of-stock') : ?>
+                            <div class="ribbon">Ej i lager</div>
+                        <?php endif; ?>
+                    </div>
                     <h4><?php echo $product->get_name(); ?></h4>
                     <p><?php echo $price_per_dl; ?> kr/dl</p>
+                    <?php if($stock_quantity > 0 && $stock_quantity <= 5) : ?>
+                        <p class="low_quantity">Endast <?php echo $stock_quantity; ?>dl i lager!</p>
+                    <?php endif; ?>
                     <div class="input-container">
-                        <button type="button" class="decrement" data-input-id="base_<?php echo $base->ID; ?>">−</button>
+                        <button type="button" class="decrement" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">−</button>
                         <input type="text" other="base" id="base_<?php echo $base->ID; ?>" name="bases[<?php echo $base->ID; ?>]" value="0 dl" onchange="updateBases()" readonly>
-                        <button type="button" class="increment" data-input-id="base_<?php echo $base->ID; ?>">+</button>                    </div>
+                        <button type="button" class="increment" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">+</button>
+                    </div>
                 </div>
             <?php
             }
@@ -90,16 +115,28 @@ function musli_selector_shortcode( $atts ) {
                 foreach ($additionalIngredients as $ingredient) {
                     $product = wc_get_product($ingredient->ID);
                     $price_per_05_dl = $product->get_price();
+                    $stock_status = $product->get_stock_status();
+                    $stock_quantity = $product->get_stock_quantity();
+                    $out_of_stock_class = ($stock_status === 'outofstock') ? 'out-of-stock' : '';
                     ?>
-                    <div class="product-box">
-                        <img src="<?php echo get_the_post_thumbnail_url($ingredient->ID); ?>" alt="<?php echo $product->get_name(); ?>">
+                    <div class="product-box <?php echo $out_of_stock_class; ?>">
+                        <div class="image-container">
+                            <img src="<?php echo get_the_post_thumbnail_url($ingredient->ID); ?>" alt="<?php echo $product->get_name(); ?>">
+                            <?php if($out_of_stock_class === 'out-of-stock') : ?>
+                                <div class="ribbon">Ej i lager</div>
+                            <?php endif; ?>
+                        </div>
                         <h4><?php echo $product->get_name(); ?></h4>
                         <p><?php echo $price_per_05_dl; ?> kr/0.5 dl</p>
+                        <?php if($stock_quantity > 0 && $stock_quantity <= 4) : ?>
+                            <p class="low-quantity">Endast <?php echo $stock_quantity/2; ?>dl i lager!</p>
+                        <?php endif; ?>
                         <div class="input-container">
-                            <button type="button" class="decrement" data-input-id="ingredient_<?php echo $ingredient->ID; ?>">-</button>
+                            <button type="button" class="decrement" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">−</button>
                             <input type="text" other="ingredient" id="ingredient_<?php echo $ingredient->ID; ?>" name="ingredients[<?php echo $ingredient->ID; ?>]" value="0 dl" onchange="updateIngredients()" readonly>
-                            <button type="button" class="increment" data-input-id="ingredient_<?php echo $ingredient->ID; ?>">+</button>                        </div>
+                            <button type="button" class="increment" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">+</button>
                     </div>
+                </div>
                     <?php
                 }
                 ?>
@@ -107,6 +144,26 @@ function musli_selector_shortcode( $atts ) {
             <!--<input type="submit" id="checkout-button" value="Till kassan" onClick="submitForm()" disabled> -->
         </div>
         </form>
+        <div id="special-popup" style="display: none;">
+            <h4 class="product-text">Vi har under julen ett specialerbjudande på kryddor, som gör sig bra i müslin. För bara några fåtals extra kronor kan du få en helt annan smak på din müsli.</h4>
+            <?php if($has_special):
+                foreach ($special_products as $special_product_post) {
+                    $special_product = wc_get_product($special_product_post->ID); ?>
+                    <div class="special-product-box">
+                        <img src="<?php echo get_the_post_thumbnail_url($special_product->get_id()); ?>" alt="<?php echo $special_product->get_name(); ?>">
+                        <h4><?php echo $special_product->get_name(); ?></h4>
+                        <p><?php echo $special_product->get_price(); ?> kr</p>
+                        <button onclick="addToCartSpecial(<?php echo $special_product->get_id(); ?>, this)">Add Special</button>
+                    </div>
+                    <?php
+                } ?>
+                <div class="skip-button-container">
+                    <button class="skip-button-mobile" onclick="skipSpecial()">Inte idag</button> <!-- Visible only on mobile -->
+                    <button class="skip-button" onclick="skipSpecial()">Inte idag</button> <!-- Always visible -->
+                </div>
+            <?php endif; ?>
+        </div>
+
     </div>
 <script type="text/javascript">
 function checkFormSubmission() {
@@ -119,6 +176,7 @@ function checkFormSubmission() {
 }
 
 jQuery(document).ready(function() {
+
     if (<?php echo WC()->cart->get_cart_contents_count(); ?> > 0) {
         // Show the popup
         jQuery('body').addClass('modal-open');
@@ -129,16 +187,29 @@ jQuery(document).ready(function() {
     // Initialize the page
     updateStep(1);
 
+    function fixShitBug(a,b,c) {
+        if(c === "base") {
+            return a < b;
+        }
+        if(c === "ingredient") {
+            return a*2 < b;
+        }
+    }
+    function fixShitBug2(a,b) {
+        return a > b;
+    }
+
     jQuery(document).on('click', '.increment', function() {
         var inputId = jQuery(this).attr('data-input-id');
         var input = jQuery('#' + inputId);
         var currentVal = parseFloat(input.val().split(" ")[0]);
         var type = input.attr('other');
+        var stock = parseFloat(jQuery(this).attr('data-stock'));
 
         var totalQuantity = calculateTotalQuantity(type);
         var allowedMax = (type === 'base') ? 7 : 4;
 
-        if (totalQuantity < allowedMax) {
+        if (fixShitBug2(allowedMax,totalQuantity) && fixShitBug(currentVal, stock, type)) {
             if(type === 'base') {
                 input.val((currentVal + 1) + " dl");
                 updateBases(); // Update bases related UI components
@@ -190,9 +261,13 @@ function submitForm() {
 
     jQuery('#next-button').click(function(event) {
     event.preventDefault();
+    console.log(hasSpecial);
     if (jQuery('#step1').is(':visible')) {
         // If on step 1, go to step 2
         updateStep(2);
+    } else if (jQuery('#step2').is(':visible') && hasSpecial) {
+        // If on step 2, go to special
+        updateStep(3);
     } else if (jQuery('#step2').is(':visible')) {
         // If on step 2, handle form submission in JavaScript
         handleFormSubmission();
@@ -220,6 +295,7 @@ function handleFormSubmission() {
 }
 
 });
+var hasSpecial = <?php echo $has_special ? 'true' : 'false'; ?>;
 
 function updateStep(step) {
     if (step === 1) {
@@ -236,7 +312,72 @@ function updateStep(step) {
         jQuery('#prev-button').prop('disabled', false); // Always enable the previous button on step 2
         jQuery('#next-button').prop('disabled', true); // Disable the next button on step 2 (until an ingredient is selected
         updateIngredients(); // This will disable the next button if no ingredients are selected
+    } else if (step === 3 && hasSpecial) {
+        jQuery('#step-monitor').html('Specialerbjudande');
+        jQuery('#step1').hide();
+        jQuery('#step2').hide();
+        jQuery('#special-popup').show();
+        jQuery('#prev-button').prop('disabled', true);
+        jQuery('#next-button').prop('disabled', true);
     }
+}
+
+function addToCartSpecial(productId, buttonElement) {
+    // Add AJAX call to add the special product to the cart
+    // Then redirect to checkout
+    // You might reuse or modify your existing addToCart function
+    var button = jQuery(buttonElement);
+    button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+jQuery.ajax({
+    type: 'POST',
+    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+    data: {
+        action: 'add_product_to_cart',
+        product_id: productId
+    },
+    success: function (response) {
+        var formData = jQuery('form').serialize();
+
+        // Make an AJAX request to submit the form
+        jQuery.ajax({
+            type: 'POST',
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            data: formData,
+            success: function(response) {
+                // On success, redirect to the cart page
+                window.location.href = '<?php echo wc_get_cart_url(); ?>';
+            },
+            error: function() {
+                // Handle errors here...
+            }
+        });
+        },
+    error: function () {
+        alert('Fel vid ingredienstilläggning - var vänlig försök igen. Om problemet kvarstår, var vänlig kontakta supporten. ');
+        jQuery('.add-to-cart-button').prop('disabled', false).html('Add to Cart');
+    }
+});
+}
+
+function skipSpecial() {
+    var skipButtons = jQuery('.skip-button, .skip-button-mobile');
+    skipButtons.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+    var formData = jQuery('form').serialize();
+
+    // Make an AJAX request to submit the form
+    jQuery.ajax({
+        type: 'POST',
+        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+        data: formData,
+        success: function(response) {
+            // On success, redirect to the cart page
+            window.location.href = '<?php echo wc_get_cart_url(); ?>';
+        },
+        error: function() {
+            // Handle errors here...
+        }
+    });
+    jQuery('#next-button').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
 }
 
 function addToCart(event, productId) {
