@@ -17,6 +17,27 @@ function musli_selector_enqueue_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'musli_selector_enqueue_scripts' );
 // Add musli selector shortcode
+
+function formatText($text) {
+    // Handle bold text
+    $text = str_replace('*', '<strong>', $text);
+    $text = preg_replace('/<strong>(.*?)<strong>/', '<strong>$1</strong>', $text);
+
+    // Handle headings
+    $text = str_replace('^', '<h1>', $text);
+    $text = preg_replace('/<h1>(.*?)<h1>/', '<h1>$1</h1>', $text);
+
+    // Handle line breaks
+    $text = str_replace('\n', '<br>', $text);
+
+    // Handle italic text
+    $text = str_replace('`', '<i>', $text);
+    $text = preg_replace('/<i>(.*?)<i>/', '<i>$1</i>', $text);
+
+    return $text;
+}
+
+
 function musli_selector_shortcode( $atts ) {
     ob_start();
     if (is_admin()) {
@@ -24,7 +45,7 @@ function musli_selector_shortcode( $atts ) {
     }
     $special_products = get_posts(array(
         'post_type' => 'product',
-        'numberposts' => -1, // Assuming you only want to display one special product
+        'numberposts' => -1,
         'tax_query' => array(
             array(
                 'taxonomy' => 'product_tag',
@@ -74,14 +95,24 @@ function musli_selector_shortcode( $atts ) {
                 $stock_status = $product->get_stock_status();
                 $stock_quantity = $product->get_stock_quantity();
                 $out_of_stock_class = ($stock_status === 'outofstock') ? 'out-of-stock' : '';
-            ?>
+                ?>
                 <div class="product-box <?php echo $out_of_stock_class; ?>">
                     <div class="image-container">
                     <img src="<?php echo get_the_post_thumbnail_url($base->ID); ?>" alt="<?php echo $product->get_name(); ?>">
                         <?php if($out_of_stock_class === 'out-of-stock') : ?>
                             <div class="ribbon">Ej i lager</div>
                         <?php endif; ?>
+                        <?php
+                    $extra_innehall = $product->get_attribute('extra_innehall');
+                    if (!empty($extra_innehall)) : ?>
+                        <button class="info-button">
+                        <span class="info">i</span>
+                        <span class="close" style="display: none;">X</span>
+                        </button>
+                        <div class="info-popup"><?php echo formatText($extra_innehall); ?></div>
+                    <?php endif; ?>
                     </div>
+
                     <h4><?php echo $product->get_name(); ?></h4>
                     <p><?php echo $price_per_dl; ?> kr/dl</p>
                     <?php if($stock_quantity > 0 && $stock_quantity <= 5) : ?>
@@ -125,6 +156,15 @@ function musli_selector_shortcode( $atts ) {
                             <?php if($out_of_stock_class === 'out-of-stock') : ?>
                                 <div class="ribbon">Ej i lager</div>
                             <?php endif; ?>
+                            <?php
+                    $extra_innehall = $product->get_attribute('extra_innehall');
+                    if (!empty($extra_innehall)) : ?>
+                        <button class="info-button">
+                        <span class="info">i</span>
+                        <span class="close" style="display: none;">X</span>
+                        </button>
+                        <div class="info-popup><?php echo formatText($extra_innehall); ?></div>
+                    <?php endif; ?>
                         </div>
                         <h4><?php echo $product->get_name(); ?></h4>
                         <p><?php echo $price_per_05_dl; ?> kr/0.5 dl</p>
@@ -153,7 +193,7 @@ function musli_selector_shortcode( $atts ) {
                         <img src="<?php echo get_the_post_thumbnail_url($special_product->get_id()); ?>" alt="<?php echo $special_product->get_name(); ?>">
                         <h4><?php echo $special_product->get_name(); ?></h4>
                         <p><?php echo $special_product->get_price(); ?> kr</p>
-                        <button onclick="addToCartSpecial(<?php echo $special_product->get_id(); ?>, this)">Add Special</button>
+                        <button onclick="addToCartSpecial(<?php echo $special_product->get_id(); ?>, this)">Lägg till</button>
                     </div>
                     <?php
                 } ?>
@@ -175,7 +215,23 @@ function checkFormSubmission() {
     return true;
 }
 
+
 jQuery(document).ready(function() {
+jQuery('.info-button').click(function() {
+    event.preventDefault();
+    jQuery(this).toggleClass('clicked');
+    jQuery(this).find('.info, .close').toggle();
+    jQuery(this).next('.info-popup').toggleClass('open');
+});
+
+jQuery(document).click(function(event) {
+    if (!jQuery(event.target).closest('.info-button, .info-popup').length) {
+        jQuery('.info-button').removeClass('clicked');
+        jQuery('.info-button .info').show();
+        jQuery('.info-button .close').hide();
+        jQuery('.info-popup').removeClass('open');
+    }
+});
 
     if (<?php echo WC()->cart->get_cart_contents_count(); ?> > 0) {
         // Show the popup
