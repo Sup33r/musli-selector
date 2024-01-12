@@ -8,9 +8,12 @@
 
 .product-box {
     background-color: #fff;
-    padding: 10px;
     margin: 10px;
-    width: auto;
+    padding-top: 0;
+    padding-bottom: 17px;
+    padding-left: 17px;
+    padding-right: 17px;
+    width: inherit;
     height: auto;
     overflow: auto;
     border-radius: 24px;
@@ -22,9 +25,24 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 .product-box h4 {
+    text-align: left !important;
+    font-size: 20px !important;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-top: 21px;
+    color: #080a0b !important;
+    margin: 0 !important;
+}
+.product-box h5 {
+    text-align: left !important;
+    font-size: 14px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #c1c0c8 !important;
+    margin: 0 !important;
+    margin-bottom: 1.75em !important;
 }
 .add-to-cart-button {
     font-size: 13px; /* Adjust as needed */
@@ -66,12 +84,6 @@ body .product-box img {
     width: 100%;
     height: auto;
     border-radius: 24px;
-}
-#status-bar {
-    height: 5px;
-    background-color: rgb(115, 244, 115);
-    transition: width 0.5s ease-in-out;
-    border-radius: 5px;
 }
 .checkout-button {
     display: none; /* Initially hidden */
@@ -158,44 +170,12 @@ body.modal-open {
     width: 100%;
 }
 
-body .navigation-buttons {
-    text-align: center;
-}
-
-body .navigation-buttons button {
-    display: inline-block;
-    box-sizing: border-box;
-    border-radius: 5px;
-    margin: 5px;
-    line-height: 1.5;
-    border: none;
-    background-color: #f0ad4e;
-    color: #fff;
-    cursor: pointer;
-    width: 141px;
-    height: 34px;
-    padding: 0 !important;
-}
-
-body .navigation-buttons button:disabled {
-    background-color: #ccc; /* Change to your desired color */
-    color: #888; /* Change to your desired color */
-    cursor: not-allowed;
-}
-
-#step-monitor {
-    text-align: center;
-    margin: 20px 0;
-    font-size: 20px;
-    font-weight: bold;
-}
-
 .input-container {
-    display: flex; /* Use flexbox for positioning the children */
-    width: auto; /* Set width as needed */
-    border: 1px solid #ccc; /* Add a border to the container */
+    display: grid; /* Use flexbox for positioning the children */
+    grid-template-columns: min-content 1fr min-content;
+    width: 75%; /* Set width as needed */; /* Add a border to the container */
     border-radius: 5px; /* Add border radius to container */
-    overflow: hidden; /* Hide overflow to maintain border radius */
+    position: relative;
 }
 
   
@@ -213,9 +193,9 @@ body .navigation-buttons button:disabled {
 
 .input-container input[type="text"] {
     border-radius: 16px !important;
-    border: 1px solid #ccc;
-    color: #676767;
-    padding: calc(0.667em + 2px) calc(0.967em + 2px);
+    border: 0px solid #ccc;
+    color: #000 !important;
+    padding: 5px 1em;
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -223,6 +203,9 @@ body .navigation-buttons button:disabled {
     box-sizing: border-box;
     outline-offset: -2px;
     text-align: center;
+    background-color: #37c939 !important;
+    grid-column: 2 / 3;
+    z-index: 1;
 }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -232,20 +215,16 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Style for increment and decrement buttons */
 .increment, .decrement {
-    background-color: #f0ad4e; /* Button background color */
-    color: #fff; /* Button text color */
+    padding: 5px 1em;
+    background-color: #4cd964; /* Button background color */
+    color: #000; /* Button text color */
     border: none; /* Remove the border */
     cursor: pointer; /* Change cursor to pointer */
     width: auto;
     height: auto;
-}
-
-/* Stack the increment button above the decrement */
-
-
-/* Stack the decrement button below the increment */
-.decrement {
-    border-top-left-radius: 5px; /* Add top border radius */
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
 }
 
 .input-container .unit {
@@ -414,3 +393,170 @@ input[type="number"]::-webkit-outer-spin-button {
     opacity: 1;
     display: block;
 }
+
+.three-dots-menu {
+    display: flex;
+    top: 10px; /* Adjust this value if you want to change the vertical position */
+    right: 10px; /* Keeps the menu on the right; adjust if needed */
+    cursor: pointer;
+    font-size: 35px; /* Increase font size to make the dots bigger */
+    color: #5d5d5b;
+    padding-bottom: 15px;
+    justify-content: flex-end;
+}
+
+.price-container p {
+    font-weight: bold;
+    font-size: 16px;
+    color: #080a0b !important;
+    display: inline;
+}
+
+.price-cart-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.add-to-cart-container button {
+    background-color: #4cd964 !important;
+    line-height: 8px;
+    text-align: center;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+.input-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0; /* Below the input field */
+    background-color: #37c939; /* Darker green background */
+    border-radius: 16px; /* Match the border-radius of the input field */
+}
+
+.best-seller-tag {
+    position: absolute;
+    bottom: 2%;
+    left: 2%;
+    font-family: 'Work Sans', sans-serif;
+    text-transform: uppercase;
+    background-color: rgba(242, 242, 242, 0.83); /* Gold color, or choose what stands out for you */
+    color: #000;
+    font-size: 1em;
+    border-radius: 24px;
+    z-index: 10; /* Make sure it's above the image */
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+#bottom-bar {
+    position: fixed; /* Fixed positioning at the bottom */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white; /* White background */
+    border-radius: 20px; /* Rounded corners */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Shadow for a lifted look */
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-around; /* Space out the children evenly */
+    align-items: center; /* Align children vertically */
+    padding: 10px; /* Add some padding */
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+#bottom-bar > button {
+    flex: 1; /* Flex grow to fill space equally */
+    margin: 0 5px; /* Add some margin between buttons */
+}
+
+#price-info {
+    display: flex; /* Use flexbox */
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Space between items */
+    background-color: #F2F2F2;
+    border-radius: 20px;
+    padding: 5px 10px; /* Add padding as needed */
+    color: black; /* Set text color to black */
+}
+
+#price-info .fa {
+    font-size: 1.5em; /* Make the icon larger */
+    margin-right: 10px;
+}
+
+#price-info p {
+    margin: 0; /* Remove margin to reduce unnecessary space */
+    font-size: 1.2em; /* Adjust font size as needed */
+}
+
+
+/* Mobile styles using a media query */
+@media (max-width: 768px) {
+    #bottom-bar {
+        /* Adjust styles for mobile if needed */
+    }
+    #bottom-bar > button, #price-info {
+        /* Adjust button and price info styles for mobile if needed */
+    }
+}
+#navigation-buttons {
+    text-align: center;
+    background-color: #F2F2F2;
+    border-radius: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+#navigation-buttons button {
+    display: inline-block;
+    box-sizing: border-box;
+    border-radius: 20px;
+    margin: 5px;
+    line-height: 1.5;
+    border: none;
+    background-color: #f0ad4e;
+    color: #1e1e1e;
+    cursor: pointer;
+    width: 90px;
+    height: 25px;
+    padding: 0 !important;
+}
+
+#navigation-buttons button:disabled {
+    background-color: #ccc; /* Change to your desired color */
+    color: #888; /* Change to your desired color */
+    cursor: not-allowed;
+}
+
+#status-indicator {
+    position: relative;
+    background-color: #F2F2F2;
+    border-radius: 20px;
+    flex: 1;
+}
+
+#status-bar {
+    position: absolute;
+    height: -webkit-fill-available;
+    background-color: rgb(115, 244, 115);
+    transition: width 0.5s ease-in-out;
+    border-radius: 20px;
+    z-index: 0;
+    margin: 2px;
+}
+#step-monitor {
+    position: relative;
+    text-align: center;
+    margin: 5px 0;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 1;
+    color: #1e1e1e;
+}
+
+

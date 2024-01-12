@@ -3,7 +3,7 @@
  * Plugin Name: Musli Selector
  * Plugin URI: https://muslimix.se
  * Description: A plugin for selecting musli in WordPress and WooCommerce.
- * Version: 1.0.6
+ * Version: 2.0.1
  * Author: Viktor :)
  * Author URI: https://muslimix.se
  * License: GPL2
@@ -14,6 +14,7 @@ function musli_selector_enqueue_scripts() {
     wp_enqueue_style( 'musli-selector', plugin_dir_url( __FILE__ ) . 'musli-selector.css' );
     wp_enqueue_script( 'musli-selector', plugin_dir_url( __FILE__ ) . 'musli-selector.js', array( 'jquery' ), '1.0.0', true );
     wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css' );
+    wp_enqueue_style( 'google-fonts', 'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap' );
 }
 add_action( 'wp_enqueue_scripts', 'musli_selector_enqueue_scripts' );
 // Add musli selector shortcode
@@ -46,6 +47,9 @@ function musli_selector_shortcode( $atts ) {
     $special_products = get_posts(array(
         'post_type' => 'product',
         'numberposts' => -1,
+        'meta_key' => '_featured',
+        'orderby' => 'meta_value',
+        'order' => 'DESC',
         'tax_query' => array(
             array(
                 'taxonomy' => 'product_tag',
@@ -67,61 +71,100 @@ function musli_selector_shortcode( $atts ) {
     </div>
     </div>
 </div>
-    <div id="status-bar" style="width: 0%;"></div>
     <form method="post" onsubmit="return checkFormSubmission();">
         <input type="hidden" name="action" value="add_musli_to_cart">
-        <div class="navigation-buttons">
-            <button id="prev-button" disabled><i class="fa fa-arrow-left"></i></button>
-            <button id="next-button" disabled><i class="fa fa-arrow-right"></i></button>
+        <div id="bottom-bar">
+            <div id="status-indicator">
+                <div id="status-bar" style="width: 0%;"></div>
+                <div id="step-monitor">Steg 1/2</div>
+            </div>
+            <div id="navigation-buttons">
+                <button id="prev-button" disabled><i class="fa fa-arrow-left"></i></button>
+                <button id="next-button" disabled><i class="fa fa-arrow-right"></i></button>
+            </div>
+            <div id="price-info">
+                <i class="fa fa-shopping-cart"></i>
+                <p>0 kr</p>
+            </div>
         </div>
-        <div id="step-monitor">Steg 1/2</div>
         <div id="step1">
             <h1 class="heading-class">Välj bas för din müsli</h1>
             <?php
-            $bases = get_posts(array(
-                'post_type' => 'product',
-                'numberposts' => -1,
-                'tax_query' => array(
+            $featured_bases = get_posts(array(
+                'post_type'      => 'product',
+                'numberposts'    => -1,
+                'order'          => 'DESC',
+                'tax_query'      => array(
+                    array(
+                        'taxonomy' => 'product_visibility',
+                        'field'    => 'name',
+                        'terms'    => 'featured',
+                        'operator' => 'IN'
+                    ),
                     array(
                         'taxonomy' => 'product_tag',
-                        'field' => 'slug',
-                        'terms' => 'base',
+                        'field'    => 'slug',
+                        'terms'    => 'base',
                     ),
                 ),
             ));
+            $non_featured_bases = get_posts(array(
+                'post_type'      => 'product',
+                'numberposts'    => -1,
+                'order'          => 'DESC',
+                'tax_query'      => array(
+                    'relation' => 'AND',
+                    array(
+                        'taxonomy' => 'product_visibility',
+                        'field'    => 'name',
+                        'terms'    => 'featured',
+                        'operator' => 'NOT IN'
+                    ),
+                    array(
+                        'taxonomy' => 'product_tag',
+                        'field'    => 'slug',
+                        'terms'    => 'base',
+                    ),
+                ),
+            ));
+            $bases = array_merge($featured_bases, $non_featured_bases);
             foreach ($bases as $base) {
                 $product = wc_get_product($base->ID);
                 $price_per_dl = $product->get_price();
                 $stock_status = $product->get_stock_status();
                 $stock_quantity = $product->get_stock_quantity();
                 $out_of_stock_class = ($stock_status === 'outofstock') ? 'out-of-stock' : '';
+                $is_best_seller = $product->is_featured();
                 ?>
                 <div class="product-box <?php echo $out_of_stock_class; ?>">
+                    <div class="three-dots-menu">...</div>
                     <div class="image-container">
                     <img src="<?php echo get_the_post_thumbnail_url($base->ID); ?>" alt="<?php echo $product->get_name(); ?>">
                         <?php if($out_of_stock_class === 'out-of-stock') : ?>
                             <div class="ribbon">Ej i lager</div>
                         <?php endif; ?>
-                        <?php
-                    $extra_innehall = $product->get_attribute('extra_innehall');
-                    if (!empty($extra_innehall)) : ?>
-                        <button class="info-button">
-                        <span class="info">i</span>
-                        <span class="close" style="display: none;">X</span>
-                        </button>
-                        <div class="info-popup"><?php echo formatText($extra_innehall); ?></div>
-                    <?php endif; ?>
+                        <?php if ($is_best_seller): ?>
+                            <div class="best-seller-tag">Bästsäljare</div>
+                        <?php endif; ?>
                     </div>
 
                     <h4><?php echo $product->get_name(); ?></h4>
-                    <p><?php echo $price_per_dl; ?> kr/dl</p>
+                    <h5><?php echo $product->get_description()?></h5>
                     <?php if($stock_quantity > 0 && $stock_quantity <= 5) : ?>
                         <p class="low_quantity">Endast <?php echo $stock_quantity; ?>dl i lager!</p>
                     <?php endif; ?>
-                    <div class="input-container">
-                        <button type="button" class="decrement" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">−</button>
-                        <input type="text" other="base" id="base_<?php echo $base->ID; ?>" name="bases[<?php echo $base->ID; ?>]" value="0 dl" onchange="updateBases()" readonly>
-                        <button type="button" class="increment" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">+</button>
+                    <div class="price-cart-container">
+                        <div class="price-container">
+                            <p><?php echo $price_per_dl; ?> kr/dl</p>
+                        </div>
+                        <div class="add-to-cart-container" >
+                            <button type="button" class="add-to-cart" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">Lägg till i mixen</button>
+                        </div>
+                        <div class="input-container" style="display: none;">
+                            <button type="button" class="decrement" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">−</button>
+                            <input type="text" other="base" id="base_<?php echo $base->ID; ?>" name="bases[<?php echo $base->ID; ?>]" value="0 dl" onchange="updateBases()" readonly>
+                            <button type="button" class="increment" data-input-id="base_<?php echo $base->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">+</button>
+                        </div>
                     </div>
                 </div>
             <?php
@@ -132,50 +175,81 @@ function musli_selector_shortcode( $atts ) {
                 <h1 class="heading-class">Välj tilläggsingredienser</h1>
                 <div id="ingredients-heading">
                 <?php
-                $additionalIngredients = get_posts(array(
-                    'post_type' => 'product',
-                    'numberposts' => -1,
-                    'tax_query' => array(
+                $featured_ingredients = get_posts(array(
+                    'post_type'      => 'product',
+                    'numberposts'    => -1,
+                    'order'          => 'DESC',
+                    'tax_query'      => array(
+                        array(
+                            'taxonomy' => 'product_visibility',
+                            'field'    => 'name',
+                            'terms'    => 'featured',
+                            'operator' => 'IN'
+                        ),
                         array(
                             'taxonomy' => 'product_tag',
-                            'field' => 'slug',
-                            'terms' => 'addition',
+                            'field'    => 'slug',
+                            'terms'    => 'addition',
                         ),
                     ),
                 ));
+                $non_featured_ingredients = get_posts(array(
+                    'post_type'      => 'product',
+                    'numberposts'    => -1,
+                    'order'          => 'DESC',
+                    'tax_query'      => array(
+                        'relation' => 'AND',
+                        array(
+                            'taxonomy' => 'product_visibility',
+                            'field'    => 'name',
+                            'terms'    => 'featured',
+                            'operator' => 'NOT IN'
+                        ),
+                        array(
+                            'taxonomy' => 'product_tag',
+                            'field'    => 'slug',
+                            'terms'    => 'addition',
+                        ),
+                    ),
+                ));
+                $additionalIngredients = array_merge($featured_ingredients, $non_featured_ingredients);
                 foreach ($additionalIngredients as $ingredient) {
                     $product = wc_get_product($ingredient->ID);
                     $price_per_05_dl = $product->get_price();
                     $stock_status = $product->get_stock_status();
                     $stock_quantity = $product->get_stock_quantity();
                     $out_of_stock_class = ($stock_status === 'outofstock') ? 'out-of-stock' : '';
+                    $is_best_seller = $product->is_featured();
                     ?>
                     <div class="product-box <?php echo $out_of_stock_class; ?>">
+                        <div class="three-dots-menu">...</div>
                         <div class="image-container">
                             <img src="<?php echo get_the_post_thumbnail_url($ingredient->ID); ?>" alt="<?php echo $product->get_name(); ?>">
                             <?php if($out_of_stock_class === 'out-of-stock') : ?>
                                 <div class="ribbon">Ej i lager</div>
                             <?php endif; ?>
-                            <?php
-                    $extra_innehall = $product->get_attribute('extra_innehall');
-                    if (!empty($extra_innehall)) : ?>
-                        <button class="info-button">
-                        <span class="info">i</span>
-                        <span class="close" style="display: none;">X</span>
-                        </button>
-                        <div class="info-popup><?php echo formatText($extra_innehall); ?></div>
-                    <?php endif; ?>
+                            <?php if ($is_best_seller): ?>
+                                <div class="best-seller-tag">Bästsäljare</div>
+                            <?php endif; ?>
                         </div>
                         <h4><?php echo $product->get_name(); ?></h4>
-                        <p><?php echo $price_per_05_dl; ?> kr/0.5 dl</p>
-                        <?php if($stock_quantity > 0 && $stock_quantity <= 4) : ?>
-                            <p class="low-quantity">Endast <?php echo $stock_quantity/2; ?>dl i lager!</p>
+                        <h5><?php echo $product->get_description()?></h5>
+                        <?php if($stock_quantity > 0 && $stock_quantity <= 5) : ?>
+                            <p class="low_quantity">Endast <?php echo $stock_quantity; ?>dl i lager!</p>
                         <?php endif; ?>
-                        <div class="input-container">
-                            <button type="button" class="decrement" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">−</button>
-                            <input type="text" other="ingredient" id="ingredient_<?php echo $ingredient->ID; ?>" name="ingredients[<?php echo $ingredient->ID; ?>]" value="0 dl" onchange="updateIngredients()" readonly>
-                            <button type="button" class="increment" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">+</button>
-                    </div>
+                        <div class="price-cart-container">
+                            <div class="price-container">
+                                <p><?php echo $price_per_05_dl; ?> kr/0.5dl</p>
+                            </div>
+                            <div class="add-to-cart-container" >
+                                <button type="button" class="add-to-cart" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">Lägg till i mixen</button>
+                            </div>
+                            <div class="input-container" style="display: none;">
+                                <button type="button" class="decrement" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">−</button>
+                                <input type="text" other="ingredient" id="ingredient_<?php echo $ingredient->ID; ?>" name="ingredients[<?php echo $ingredient->ID; ?>]" value="0 dl" onchange="updateIngredients()" readonly>
+                                <button type="button" class="increment" data-input-id="ingredient_<?php echo $ingredient->ID; ?>" data-stock="<?php echo $stock_quantity; ?>">+</button>
+                            </div>
+                        </div>
                 </div>
                     <?php
                 }
@@ -217,7 +291,7 @@ function checkFormSubmission() {
 
 
 jQuery(document).ready(function() {
-jQuery('.info-button').click(function() {
+    jQuery('.info-button').click(function() {
     event.preventDefault();
     jQuery(this).toggleClass('clicked');
     jQuery(this).find('.info, .close').toggle();
@@ -254,6 +328,35 @@ jQuery(document).click(function(event) {
     function fixShitBug2(a,b) {
         return a > b;
     }
+    jQuery(document).on('click', '.add-to-cart', function() {
+        var inputId = jQuery(this).attr('data-input-id');
+        var input = jQuery('#' + inputId);
+        var currentVal = parseFloat(input.val().split(" ")[0]);
+        var type = input.attr('other');
+        var allowedMax = (type === 'base') ? 7 : 4;
+        var stock = parseFloat(jQuery(this).attr('data-stock'));
+        var totalQuantity = calculateTotalQuantity(type);
+        var price = parseFloat(jQuery(this).closest('.product-box').find('.price-container p').text().split(" ")[0]);
+        var priceContainer = jQuery('#price-info p');
+        var totalPrice = parseFloat(priceContainer.text().split(" ")[0]);
+
+        if (fixShitBug2(allowedMax, totalQuantity) && fixShitBug(currentVal, stock, type)) {
+            console.log(type);
+            if (type === 'base') {
+                input.val((currentVal + 1) + " dl");
+                priceContainer.text((totalPrice + price) + " kr");
+                updateBases(); // Update bases related UI components
+            } else {
+                input.val((0.5) + " dl");
+                console.log(input);
+                priceContainer.text((totalPrice + price) + " kr");
+                updateIngredients(); // Update ingredients related UI components
+            }
+        }
+        // Hide the add-to-cart div and show the input-container
+        jQuery(this).closest('.add-to-cart-container').hide();
+        jQuery(this).closest('.product-box').find('.input-container').show();
+    });
 
     jQuery(document).on('click', '.increment', function() {
         var inputId = jQuery(this).attr('data-input-id');
@@ -264,13 +367,17 @@ jQuery(document).click(function(event) {
 
         var totalQuantity = calculateTotalQuantity(type);
         var allowedMax = (type === 'base') ? 7 : 4;
-
+        var price = parseFloat(jQuery(this).closest('.product-box').find('.price-container p').text().split(" ")[0]);
+        var priceContainer = jQuery('#price-info p');
+        var totalPrice = parseFloat(priceContainer.text().split(" ")[0]);
         if (fixShitBug2(allowedMax,totalQuantity) && fixShitBug(currentVal, stock, type)) {
             if(type === 'base') {
                 input.val((currentVal + 1) + " dl");
+                priceContainer.text((totalPrice + price) + " kr");
                 updateBases(); // Update bases related UI components
             } else {
                 input.val((currentVal + 0.5) + " dl");
+                priceContainer.text((totalPrice + price) + " kr");
                 updateIngredients(); // Update ingredients related UI components
             }
         }
@@ -281,15 +388,25 @@ jQuery(document).click(function(event) {
         var input = jQuery('#' + inputId);
         var currentVal = parseFloat(input.val().split(" ")[0]);
         var type = input.attr('other');
-
+        var price = parseFloat(jQuery(this).closest('.product-box').find('.price-container p').text().split(" ")[0]);
+        var priceContainer = jQuery('#price-info p');
+        var totalPrice = parseFloat(priceContainer.text().split(" ")[0]);
         if (currentVal > 0) {
             if(type === 'base') {
                 input.val((currentVal - 1) + " dl");
+                priceContainer.text((totalPrice - price) + " kr");
                 updateBases(); // Update bases related UI components
             } else {
                 input.val((currentVal - 0.5) + " dl");
+                priceContainer.text((totalPrice - price) + " kr");
                 updateIngredients(); // Update ingredients related UI components
             }
+        }
+
+        // If the value is 0 after decrementing, hide the input-container and show the add-to-cart button
+        if (parseFloat(input.val().split(" ")[0]) === 0) {
+            jQuery(this).closest('.input-container').hide();
+            jQuery(this).closest('.product-box').find('.add-to-cart-container').show();
         }
     });
 
@@ -510,6 +627,7 @@ function updateBases() {
     // Update the status bar and "Checkout" button
     if (anySelected) {
         updateStatusBar(50);
+        jQuery()
         jQuery('#checkout-button').prop('disabled', false);
         jQuery('#next-button').prop('disabled', false);
     } else {
