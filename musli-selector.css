@@ -173,7 +173,7 @@ body.modal-open {
 .input-container {
     display: grid; /* Use flexbox for positioning the children */
     grid-template-columns: min-content 1fr min-content;
-    width: 75%; /* Set width as needed */; /* Add a border to the container */
+    width: 64%; /* Set width as needed */; /* Add a border to the container */
     border-radius: 5px; /* Add border radius to container */
     position: relative;
 }

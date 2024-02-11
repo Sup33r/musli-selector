@@ -585,12 +585,12 @@ function addToCart(event, productId) {
 
 function updateIngredients() {
     // Get all the quantity inputs
-    var quantities = jQuery('input[other="ingredient"]');
+    const quantities = jQuery('input[other="ingredient"]');
 
     // Check if any ingredients have been selected
-    var anySelected = false;
+    let anySelected = false;
     quantities.each(function() {
-        var quantity = parseFloat(jQuery(this).val().split(" ")[0]); // Split the value and get the number part
+        const quantity = parseFloat(jQuery(this).val().split(" ")[0]); // Split the value and get the number part
         if (quantity > 0) {
             anySelected = true;
             return false; // Break out of the loop
