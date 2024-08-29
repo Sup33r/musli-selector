@@ -138,7 +138,7 @@ function musli_selector_shortcode( $atts ) {
                 ?>
                 <div class="product-box <?php echo $out_of_stock_class; ?>">
                     <div class="three-dots-menu">...</div>
-                    <div class="image-container">
+                    <div class="image-container" id="image_base_<?php echo $base->ID; ?>">
                     <img src="<?php echo get_the_post_thumbnail_url($base->ID); ?>" alt="<?php echo $product->get_name(); ?>">
                         <?php if($out_of_stock_class === 'out-of-stock') : ?>
                             <div class="ribbon">Ej i lager</div>
@@ -223,7 +223,7 @@ function musli_selector_shortcode( $atts ) {
                     ?>
                     <div class="product-box <?php echo $out_of_stock_class; ?>">
                         <div class="three-dots-menu">...</div>
-                        <div class="image-container">
+                        <div class="image-container" id="image_ingredient_<?php echo $ingredient->ID; ?>">
                             <img src="<?php echo get_the_post_thumbnail_url($ingredient->ID); ?>" alt="<?php echo $product->get_name(); ?>">
                             <?php if($out_of_stock_class === 'out-of-stock') : ?>
                                 <div class="ribbon">Ej i lager</div>
